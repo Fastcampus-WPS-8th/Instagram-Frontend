@@ -36,6 +36,10 @@
     // 3. 페이스북 로그인도 되어있고, 앱 승인도 된 경우
     //  유저 정보를 확인해본다
     //    -> FB.login()
+    init()
+    function init() {
+      getUserInfo();
+    }
     
     $('#btn-facebook').click(facebookLogin);
     // 페이스북 로그인을 실행할 함수
@@ -71,6 +75,31 @@
           
         }
       }, {scope: 'public_profile'});
+    }
+    
+    // 쿠키에 저장되어 있는 token값을 사용해 User정보를 받아오는 함수
+    function getUserInfo() {
+      var token = getCookie('token');
+      if (token) {
+        // User정보는 Profile API에서 받아옴
+        axios({
+          method: 'get',
+          url: 'http://localhost:8000/api/users/profile/',
+          headers: {
+            'Authorization': 'Token ' + getCookie('token')
+          }
+        })
+        .then(function (response) {
+          // 보낸 인증정보가 올바르면 (정상 응답이 오면)
+          // 응답에 포함된 User정보를 사용해 #info요소의 텍스트를 변경
+          $('#info').text(`${response.data.last_name}${response.data.first_name}(으)로 로그인 중`);
+          // 로그인 버튼은 가림
+          $('#btn-facebook').hide();
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      }
     }
     
   </script>
